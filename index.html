@@ -5,6 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookmarking</title>
+    <link rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        body, .jumbotron { padding: 30px; }
+    </style>
     <!-- Style Sheet -->
     <style>
 
@@ -83,8 +88,9 @@
         }
 
         .bookmark {
-            display: block;
+            display: flex;
             background: #fff;
+            position: relative;
             color: #999;
             padding: 20px;
             transition: 0.3s ease all;
@@ -106,6 +112,35 @@
             border-bottom-left-radius: 5px;
             border-bottom: 0;
         }
+
+        .bookmark .img {
+            background-color: #ddd;
+            border-radius: 3px;
+            background-image: url();
+            background-size: cover;
+            width: 80px;
+            height: 60px;
+            margin-right: 20px;
+        }
+
+        .bookmark .title {
+            display: flex;
+            align-items: center;
+        }
+
+        .bookmark .glyphicon-remove {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #eee;
+            font-size: 17px;
+            transition: 0.3s ease color;
+            cursor: pointer;
+        }
+
+        .bookmark:hover .glyphicon-remove {
+            color: #aaa;
+        }
     </style>
 </head>
 <body>
@@ -125,6 +160,7 @@
 
 <div class="bookmarks-list content"></div>
 
+<!-- Javascript -->
 <script>
     const body = document.body;
     const input = document.querySelector('input[type=text]');
@@ -146,24 +182,94 @@
 
     // ======================
     
+
+
     const bookmarksList = document.querySelector('.bookmarks-list');
-    const bookmarkForm = document.querySelector('.bookmark-form');
+    const bookmarkForm  = document.querySelector('.bookmark-form');
     const bookmarkInput = bookmarkForm.querySelector('input[type=text]');
+    const bookmarks     = JSON.parse(localStorage.getItem('bookmarks')) || [];
+    const apiUrl        = 'https://opengraph.io/api/1.0/site';
+    const appId         = '58858c7bcf07b61e64257391';
+
+    const myUrl = encodeURIComponent
+    'https://scotch.io/tutorials/build-a-music-player-with-angular-electron-ii-making-the-ui';
+
+    fetch(apiUrl + '/' + myUrl + '?app_id=' + appId)
+        .then(response => {
+            // assign and handle variables or data
+        });
+
+    fillBookmarksList(bookmarks);
 
     function createBookmark(e) {
         e.preventDefault();
 
+        // add a new bookmark to the bookmarks
         const title = bookmarkInput.value;
-        const bookmark = document.createElement('a');
-        bookmark.className = 'bookmark';
-        bookmark.innerText = title;
-        bookmark.href = '#';
-        bookmarksList.appendChild(bookmark);
-
+        const bookmark = {
+            title: title
+        };
+        bookmarks.push(bookmark);
+        fillBookmarksList(bookmarks);
+        storeBookmarks(bookmarks);
         bookmarkForm.reset();
+
+        console.table(bookmarks);
+
+
+
+        // save that bookmarks list to localStorage
+
+        // const title = bookmarkInput.value;
+        // const bookmark = document.createElement('a');
+        // bookmark.className = 'bookmark';
+        // bookmark.innerText = title;
+        // bookmark.href = '#';
+        // bookmarksList.appendChild(bookmark);
+
+    } 
+
+    function fillBookmarksList(bookmarks = []) {
+        const bookmarksHtml = bookmarks.map((bookmark, i) => {
+            return `
+            <a href="#" class="bookmark" data-id"${i}">
+                <div class="img"></div>
+                <div class="title">${bookmark.title}</div>
+                <span class="glyphicon glyphicon-remove"></span>
+            </a>
+            `;
+        }).join('');
+
+        bookmarksList.innerHTML = bookmarksHtml;
+ 
+        // let bookmarksHtml = '';
+        // for (i = 0; i < bookmarks.length; i++) {
+        //     bookmarksHtml += 
+        // }
+
+        // console.log(bookmarksHtml);
+    }
+
+    function removeBookmark(e) {
+        if (!e.target.matches('.glyphicon-remove')) return;
+    
+        // find the index
+        // remove from the bookmarks using splice
+        // fill the list
+        // store back to localStorage
+        const index = e.target.parentNode.dataset.id;
+        bookmarks.splice(index, 1);
+        fillBookmarksList(bookmarks);
+        storeBookmarks(bookmarks);
+    }
+
+    function storeBookmarks(bookmarks = []) {
+        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
     }
 
     bookmarkForm.addEventListener('submit', createBookmark);
+    bookmarksList.addEventListener('click', removeBookmark);
+
 </script>
 
 
